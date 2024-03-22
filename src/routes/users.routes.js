@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { UserController } from "../controllers/user.controller.js";
+import passport from "passport"; 
+import { uploader } from "../uploader.js";
 
 const router = Router();
 const controller = new UserController();
@@ -53,5 +55,20 @@ router.get("/mock/:qty", async (req, res) => {
     res.status(500).send({ status: "ERR", data: err.message });
   }
 });
+
+// Ruta para actualizar a un usuario a premium
+router.get(
+  "/premium/:uid",
+  passport.authenticate("jwt", { session: false }),
+  controller.upgradeToPremium
+);
+
+// Ruta para subir documentos de un usuario
+router.post(
+  "/:uid/documents",
+  passport.authenticate("jwt", { session: false }),
+  uploader.single("file"),
+  controller.uploadDocuments
+);
 
 export default router;

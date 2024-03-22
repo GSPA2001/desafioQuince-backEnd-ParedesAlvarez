@@ -110,3 +110,9 @@
   label: 'production',
   timestamp: '2024-03-13T01:13:36.450Z'
 }
+{
+  message: 'Accediendo a la página de chat 💬..',
+  level: 'info',
+  label: 'production',
+  timestamp: '2024-03-22T02:36:46.451Z'
+}

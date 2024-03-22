@@ -53,4 +53,57 @@ export class UserController {
         }
         return [mockCarts, mockUsers];
     }
+
+    async upgradeToPremium(req, res) {
+        try {
+            const { uid } = req.params;
+            const user = await service.getUserById(uid);
+    
+            if (!user) {
+                return res.status(404).send({ status: "ERR", message: "User not found" });
+            }
+    
+            // Verificar si el usuario ha cargado los documentos requeridos
+            if (!user.documents || user.documents.length === 0) {
+                return res.status(400).send({ status: "ERR", message: "User must upload required documents before upgrading to premium" });
+            }
+    
+            if (user.role !== "user") {
+                return res.status(400).send({ status: "ERR", message: "User is not a regular user" });
+            }
+    
+            user.role = "premium";
+            await service.updateUser(user);
+    
+            return res.status(200).send({ status: "OK", message: "User upgraded to premium" });
+        } catch (err) {
+            console.error(err);
+            return res.status(500).send({ status: "ERR", message: "Internal server error" });
+        }
+    }    
+
+    async uploadDocuments(req, res) {
+        try {
+            const { uid } = req.params;
+            const user = await service.getUserById(uid);
+
+            if (!user) {
+                return res.status(404).send({ status: "ERR", message: "User not found" });
+            }
+
+            const documents = req.files.map(file => ({
+                name: file.originalname,
+                reference: file.filename
+            }));
+
+            user.documents = user.documents || [];
+            user.documents.push(...documents);
+            await service.updateUser(user);
+
+            return res.status(200).send({ status: "OK", message: "Documents uploaded successfully", documents });
+        } catch (err) {
+            console.error(err);
+            return res.status(500).send({ status: "ERR", message: "Internal server error" });
+        }
+    }
 }
